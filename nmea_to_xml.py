@@ -18,6 +18,7 @@
 
 import os
 import sys
+from optparse import OptionParser
 
 def convert(input_dir, output_dir, output_formats):
     for format in output_formats:
@@ -27,16 +28,33 @@ def convert(input_dir, output_dir, output_formats):
 
                 cmd = 'gpsbabel \
                 -i nmea \
-                -f "' + input_dir + input + '" \
+                -f "' + os.path.join(input_dir, input) + '" \
                 -o ' + format + ' \
-                -F ' + output_dir + input[0:-4] + '.' + format
+                -F ' + os.path.join(output_dir, input[0:-4] + '.' + format)
 
                 os.system(cmd)
 
-if __name__ == "__main__":
-    print 'Converts NMEA log files from a GPS unit (Navman MY450LMT) to KML and GPX'
 
-    if len(sys.argv) == 3:
-        convert(sys.argv[1], sys.argv[2], ['gpx', 'kml'])
-    else:
-        print 'python nmea_to_xml.py input_dir output_dir'
+if __name__ == "__main__":
+    usage = """
+    Converts NMEA log files from a GPS unit (Navman MY450LMT) to another format.
+
+    Example converting all .log files in directory (./input) to GPX and KML format:
+    python nmea_to_xml.py -gk -i input -o output
+    """
+
+    p = OptionParser(usage=usage)
+    p.add_option('-i', '--input', dest='input_dir', action='store')
+    p.add_option('-o', '--output', dest='output_dir', action='store')
+    p.add_option('-k', '--kml', dest='kml', action='store_true', default=False)
+    p.add_option('-g', '--gpx', dest='gpx', action='store_true', default=False)
+    (opt, args) = p.parse_args()
+
+    formats = []
+    if opt.gpx: formats.append('gpx')
+    if opt.kml: formats.append('kml')
+
+    if not all([opt.input_dir, opt.output_dir, len(formats) > 0]):
+        sys.exit('Try --help')
+
+    convert(opt.input_dir, opt.output_dir, formats)
