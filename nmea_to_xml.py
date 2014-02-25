@@ -18,7 +18,7 @@
 
 import os
 import sys
-from optparse import OptionParser
+import argparse
 
 def convert(input_dir, output_dir, output_formats):
     for format in output_formats:
@@ -50,32 +50,26 @@ def convert_and_join(input_dir, output_filepath, output_formats):
 
 
 if __name__ == "__main__":
-    usage = """
-    Converts NMEA log files from a GPS unit (Navman MY450LMT) to another format.
 
-    Example converting all .log files in directory (./input) to GPX and KML format:
-    python nmea_to_xml.py -gk -i input -o output
+    p = argparse.ArgumentParser(description='Converts NMEA log files from a GPS unit (Navman MY450LMT) to another format')
+    p.add_argument('-i', '--input', help='Input directory')
+    p.add_argument('-o', '--output', help='Output directory (or filepath with --join)')
+    p.add_argument('-k', '--kml', action='store_true', help='Generate KML file')
+    p.add_argument('-g', '--gpx', action='store_true', help='Generate GPX file')
+    p.add_argument('-j', '--join', action='store_true', help='Join all log files and convert into a single output file')
+    arg = p.parse_args()
 
-    Example joining all .log files to a single KML file in ./output/complete.kml:
-    python nmea_to_xml.py -kj -i input -o output/complete
-    """
+    if not all([arg.input, arg.output]):
+        p.error('No directory specified. Add --input and --output')
 
-    p = OptionParser(usage=usage)
-    p.add_option('-i', '--input', dest='input', action='store')
-    p.add_option('-o', '--output', dest='output', action='store')
-    p.add_option('-k', '--kml', dest='kml', action='store_true', default=False)
-    p.add_option('-g', '--gpx', dest='gpx', action='store_true', default=False)
-    p.add_option('-j', '--join', dest='join', action='store_true', default=False)
-    (opt, args) = p.parse_args()
+    if not any([arg.gpx, arg.kml]):
+        p.error('No output file format specified. Add --gpx or --kml')
 
     formats = []
-    if opt.gpx: formats.append('gpx')
-    if opt.kml: formats.append('kml')
+    if arg.gpx: formats.append('gpx')
+    if arg.kml: formats.append('kml')
 
-    if not all([opt.input, opt.output, len(formats) > 0]):
-        sys.exit('Try --help')
-
-    if opt.join:
-        convert_and_join(opt.input, opt.output, formats)
+    if arg.join:
+        convert_and_join(arg.input, arg.output, formats)
     else:
-        convert(opt.input, opt.output, formats)
+        convert(arg.input, arg.output, formats)
