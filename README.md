@@ -12,3 +12,5 @@ Example joining all .log files to a single KML file in ./output/complete.kml:
   ```
   python nmea_to_xml.py -kj -i input -o output/complete
   ```
+
+Requires: GPSBabel (http://www.gpsbabel.org) and Python (http://www.python.org)
