@@ -35,26 +35,47 @@ def convert(input_dir, output_dir, output_formats):
                 os.system(cmd)
 
 
+def convert_and_join(input_dir, output_filepath, output_formats):
+    for format in output_formats:
+        print format
+        cmd = 'gpsbabel '
+
+        for input in os.listdir(input_dir):
+            if '.log' in input:
+                print input
+                cmd += ' -i nmea -f "%s"' % os.path.join(input_dir, input)
+
+        cmd += ' -o ' + format + ' -F ' + output_filepath + '.' + format
+        os.system(cmd)
+
+
 if __name__ == "__main__":
     usage = """
     Converts NMEA log files from a GPS unit (Navman MY450LMT) to another format.
 
     Example converting all .log files in directory (./input) to GPX and KML format:
     python nmea_to_xml.py -gk -i input -o output
+
+    Example joining all .log files to a single KML file in ./output/complete.kml:
+    python nmea_to_xml.py -kj -i input -o output/complete
     """
 
     p = OptionParser(usage=usage)
-    p.add_option('-i', '--input', dest='input_dir', action='store')
-    p.add_option('-o', '--output', dest='output_dir', action='store')
+    p.add_option('-i', '--input', dest='input', action='store')
+    p.add_option('-o', '--output', dest='output', action='store')
     p.add_option('-k', '--kml', dest='kml', action='store_true', default=False)
     p.add_option('-g', '--gpx', dest='gpx', action='store_true', default=False)
+    p.add_option('-j', '--join', dest='join', action='store_true', default=False)
     (opt, args) = p.parse_args()
 
     formats = []
     if opt.gpx: formats.append('gpx')
     if opt.kml: formats.append('kml')
 
-    if not all([opt.input_dir, opt.output_dir, len(formats) > 0]):
+    if not all([opt.input, opt.output, len(formats) > 0]):
         sys.exit('Try --help')
 
-    convert(opt.input_dir, opt.output_dir, formats)
+    if opt.join:
+        convert_and_join(opt.input, opt.output, formats)
+    else:
+        convert(opt.input, opt.output, formats)
