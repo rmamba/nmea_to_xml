@@ -1,5 +1,5 @@
 """
-    Copyright (C) 2014 Richard Laugesen, richard@tinyrock.com
+    Copyright (C) 2014 Tiny Rock Pty Ltd
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
